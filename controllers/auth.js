@@ -3,6 +3,7 @@ const generalHelper = require('../helpers/generalHelper');
 const { Account } = require('../model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+
 const moment = require('moment');
 
 const accountRegistration = async(req, res) => {
