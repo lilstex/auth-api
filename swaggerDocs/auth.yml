@@ -1,0 +1,325 @@
+paths:
+  /api/user/create-account:
+    post:
+      tags: 
+        - AUTH
+      summary: ACCOUNT REGISTRATION ENDPOINT
+      produces:
+        - application/json
+      parameters:
+        - in: body # request body
+          name: user-account-registration 
+          description: It enables all users to create an account
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/userAccount"
+      responses:
+        201:
+          description: should return user account registration successful
+
+  /api/user/login:
+    post:
+      tags: 
+        - AUTH
+      summary: GENERAL LOGIN ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: body 
+          name: login endpoint 
+          description: It enables all accounts to login
+          required: true 
+          schema: 
+            $ref: "#/definitions/login"
+      responses:
+        200:
+          description: should return login successful
+
+  /api/user/resend-verificationCode:
+    post:
+      tags: 
+        - AUTH
+      summary: RESEND VERIFICATION CODE ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: body 
+          name: resend-verification endpoint 
+          description: It enables user to request for new coode
+          required: true 
+          schema: 
+            $ref: "#/definitions/resendVerification"
+      responses:
+        200:
+          description: should return successful
+
+  /api/user/verify-account:
+    post:
+      tags: 
+        - AUTH
+      summary: VERIFY ACCOUNT ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: body 
+          name: validate-verification and verify endpoint 
+          description: This endpoint validates the codes and verifies account
+          required: true 
+          schema: 
+            $ref: "#/definitions/verifyAccount"
+      responses:
+        200:
+          description: should return successful
+
+  /api/user/forgot-password:
+    post:
+      tags: 
+        - AUTH
+      summary: FORGOT PASSWORD ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: body 
+          name: send password reset code endpoint 
+          description: This endpoint requests for password reset code
+          required: true 
+          schema: 
+            $ref: "#/definitions/passwordResetCode"
+      responses:
+        200:
+          description: should return successful
+
+  /api/user/validate-password-reset-code:
+    post:
+      tags: 
+        - AUTH
+      summary: VALIDATE PASSWORD RESET ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: body 
+          name: validate password reset code endpoint 
+          description: This endpoint validates password reset code
+          required: true 
+          schema: 
+            $ref: "#/definitions/validatePasswordResetCode"
+      responses:
+        200:
+          description: should return successful
+
+  /api/user/update-password:
+    post:
+      tags: 
+        - AUTH
+      summary: UPDATE PASSWORD ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: body 
+          name: update password endpoint 
+          description: This endpoint updates password
+          required: true 
+          schema: 
+            $ref: "#/definitions/updatePassword"
+      responses:
+        200:
+          description: should return successful
+
+  /api/user/update-account:
+    post:
+      tags: 
+        - AUTH
+      summary: UPDATE ACCOUNT ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: body 
+          name: update account endpoint 
+          description: This endpoint updates account
+          required: true 
+          schema: 
+            $ref: "#/definitions/updateAccount"
+      responses:
+        200:
+          description: should return successful
+
+  /api/user/assign-role:
+    put:
+      tags: 
+        - AUTH
+      summary: ASSIGN ROLE ENDPOINT 
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
+
+        - in: body 
+          name: assign role endpoint 
+          description: This endpoint assigns roles to staff accounts
+          required: true 
+          schema: 
+            $ref: "#/definitions/assignRole"
+      responses:
+        200:
+          description: should return successful
+
+  /api/room/create-room:
+    post:
+      tags: 
+        - ROOM
+      summary: ROOM CREATION ENDPOINT
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
+
+        - in: body # request body
+          name: room-creation 
+          description: It enables admin to create rooms
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/createRoom"
+      responses:
+        201:
+          description: should return room created successfully
+
+
+definitions: # Schema definition for request body
+  userAccount:
+    type: object
+    properties:
+      email:
+        type: string
+        default: lilstex@gmail.com
+      firstName:
+        type: string
+        default: John
+      lastName:
+        type: string
+        default: Doe
+      accountType:
+        type: string
+        default: customer
+      password:
+        type: string
+        default: password
+      phoneNumber:
+        type: string
+        default: +2348037335555
+
+  login:
+    type: object
+    properties:
+      email:
+        type: string
+        default: lilstex@gmail.com
+      password:
+        type: string
+        default: password
+
+  resendVerification:
+    type: object
+    properties:
+      verificationMethod:
+        type: string
+        default: email
+      email:
+        type: string
+        default: lilstex@gmail.com
+      phoneNumber:
+        type: string
+        default: +2348037335555
+
+  verifyAccount: 
+    type: object
+    properties:
+      authId:
+        type: string
+        default: 6332d33b23b7f834dbdff103
+      verificationMethod:
+        type: string
+        default: email
+      emailCode:
+        type: number
+        default: 123456
+      phoneNumberCode:
+        type: number
+        default: 123456
+
+  passwordResetCode:
+    type: object
+    properties:
+      email:
+        type: string
+        default: lilstex@gmail.com
+
+  validatePasswordResetCode: 
+    type: object
+    properties:
+      email:
+        type: string
+        default: lilstex@gmail.com
+      passwordCode:
+        type: number
+        default: 123456
+
+  updatePassword: 
+    type: object
+    properties:
+      email:
+        type: string
+        default: lilstex@gmail.com
+      password:
+        type: string
+        default: password
+      
+  updateAccount:
+    type: object
+    properties:
+      authId:
+        type: string
+        default: 6332d33b23b7f834dbdff103
+      firstName:
+        type: string
+        default: John
+      lastName:
+        type: string
+        default: Doe
+
+  assignRole:
+    type: object
+    properties:
+      userId:
+        type: string
+        default: 6332d33b23b7f834dbdff103
+      role:
+        type: string
+        default: operator
+
+  createRoom:
+    type: object
+    properties:
+      roomNumber:
+        type: number
+        default: 1
+      floorNumber:
+        type: number
+        default: 1
+      roomPrice:
+        type: number
+        default: 5000
+      roomSize:
+        type: string
+        default: small
+      roomStatus:
+        type: boolean
+        default: false
+

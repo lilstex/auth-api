@@ -1,0 +1,33 @@
+{
+  "name": "HMS",
+  "version": "1.0.0",
+  "description": "A Hotel Management System API",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest --watchAll --no-cache",
+    "start": "node app",
+    "dev": "nodemon src/app"
+  },
+  "keywords": [
+    "Room",
+    "Hotel"
+  ],
+  "author": "lilstex",
+  "license": "ISC",
+  "devDependencies": {
+    "mongodb-memory-server": "^8.9.5",
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "joi": "^17.6.1",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
+    "mongoose": "^5.13.7",
+    "swagger-jsdoc": "^6.2.5",
+    "swagger-ui-express": "^4.5.0"
+  }
+}
