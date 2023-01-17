@@ -43,5 +43,5 @@ const removeConfidentialData = (data) => {
 module.exports = {
     generateEmailCode,
     generatePhoneNumberCode,
-    removeConfidentialData
+    removeConfidentialData,
 };
