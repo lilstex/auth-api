@@ -12,26 +12,17 @@ const generateEmailCode = () => {
     return testCode;
 };
 
-const generatePhoneNumberCode = () => {
-    if (process.env.SMS_PIPE === "production") {
-        const phoneNumberCode = between(100000, 200000);
-
-        return phoneNumberCode;
-    }
-    return testCode;
-};
-
 const removeConfidentialData = (data) => {
     let result;
     if (data.length > 0) {
         result = data.map((object) => {
-            const { password, emailCode, phoneNumberCode, __v, _id, ...serializeUserDetails } =
+            const { password, __v, _id, ...serializeUserDetails } =
                 JSON.parse(JSON.stringify(object));
 
             return serializeUserDetails;
         });
     } else {
-        const { password, emailCode, phoneNumberCode, passwordCode, passwordResetCodeExpiresAt, __v, _id, ...serializeUserDetails } =
+        const { password, passwordCode, passwordResetCodeExpiresAt, __v, _id, ...serializeUserDetails } =
         JSON.parse(JSON.stringify(data));
 
         result = serializeUserDetails;
@@ -42,6 +33,5 @@ const removeConfidentialData = (data) => {
 
 module.exports = {
     generateEmailCode,
-    generatePhoneNumberCode,
     removeConfidentialData,
 };

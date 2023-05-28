@@ -24,40 +24,12 @@ const account = new mongoose.Schema(
       type: String,
     },
 
-    accountType: {
-      type: String,
-      enum: {
-        values: ["admin", "staff", "customer"],
-        message:
-          "account must be admin or staff or customer",
-      },
-      required: [true],
-    },
-
     role: {
       type: String,
       enum: {
-        values: ["manager", "operator", "guest"],
+        values: ["admin", "user"],
       },
-      required: [true],
-    },
-
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-
-    isPhoneVerified: {
-      type: Boolean,
-      default: false,
-    },
-
-    emailCode: {
-      type: Number,
-    },
-
-    phoneNumberCode: {
-      type: Number,
+      default: "user"
     },
 
     passwordCode: {

@@ -17,12 +17,8 @@ module.exports = (obj) => {
       publicData = {
         authId: req.authData._id,
         email: req.authData.email,   
-        isEmailVerified: req.authData.isEmailVerified,
         phoneNumber: req.authData.phoneNumber,
       };
-      if (!req.authData.isEmailVerified) {
-        return Response.validatorError("Please Verify Your Account", res)
-      }
     }
 
     const personalData = {

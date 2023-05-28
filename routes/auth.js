@@ -18,18 +18,6 @@ routes.post(
 );
 
 routes.post(
-    "/resend-verificationCode", 
-    validate(validator.resendVerificationCode), 
-    auth.resendVerificationCode
-);
-
-routes.post(
-    "/verify-account", 
-    validate(validator.verifyAccount), 
-    auth.verifyAccount
-);
-
-routes.post(
     "/forgot-password", 
     validate(validator.sendPasswordResetCode), 
     auth.sendPasswordResetCode

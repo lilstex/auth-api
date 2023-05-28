@@ -1,28 +1,12 @@
-const Joi = require("joi");
-require("dotenv").config();
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
 
-const schema = Joi.object({
-  NODE_ENV: Joi.string()
-    .valid("development", "production", "test", "provision")
-    .default("development"),
-  PORT: Joi.number().required(),
-  DATABASE: Joi.string().required().description("Database connection URL"),
-})
-  .unknown()
-  .required();
-
-const { error, value: env } = schema.validate(process.env);
-
-if (error) {
-  console.log(`Config validation error: ${error.message}`);
-  return;
-}
-
-const config = {
-    env: env.NODE_ENV,
-    port: env.PORT,
-    dbURL: env.DATABASE,
-  };
+// Configure the SendGrid transporter
+const options = {
+    auth: {
+        api_key: process.env.SEND_GRID_API_KEY,
+    },
+};
   
-  module.exports = config;
-  
+const transporter = nodemailer.createTransport(sgTransport(options));
+module.exports = transporter;  

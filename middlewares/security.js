@@ -2,14 +2,12 @@ const jwt = require('jsonwebtoken');
 const Response = require('../helpers/response');
 
 const nonRestricted = [
-    "/api/user/create-account",
-    "/api/user/login",
-    "/api/user/resend-verificationCode",
-    "/api/user/verify-account",
-    "/api/user/forgot-password",
-    "/api/user/validate-password-reset-code",
-    "/api/user/update-password",
-    "/api/user/update-account",
+    "/create-account",
+    "/login",
+    "/forgot-password",
+    "/validate-password-reset-code",
+    "/update-password",
+    "/update-account",
 ]
 
 module.exports = (req, res, next) => {

@@ -3,12 +3,13 @@ const generalHelper = require('../helpers/generalHelper');
 const { Account } = require('../model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { transporter } = require("../configs");
 
 const moment = require('moment');
 
 const accountRegistration = async(req, res) => {
     try{
-        const { email, password, phoneNumber, accountType, firstName, lastName } = req.body;
+        const { email, password, phoneNumber, firstName, lastName } = req.body;
         // check if email is already in use
         const existingUser = await Account.findOne({email});
         if(existingUser) {
@@ -23,22 +24,11 @@ const accountRegistration = async(req, res) => {
         // Encrypt password
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        // Generate email and phone verification codes
-        const emailCode = generalHelper.generateEmailCode();
-        const phoneNumberCode = generalHelper.generatePhoneNumberCode();
-
-        // Send the emailCode and phoneCode to the users email and phoneNumber
-        // Respectively to verify (Feature to be added soon)
-
         // Create the account
         const newAccount = await Account.create({
             email,
             password: hashedPassword,
             phoneNumber: phoneNumber,
-            emailCode,
-            phoneNumberCode,
-            accountType,
-            role: "guest",
             firstName,
             lastName
         });
@@ -48,7 +38,7 @@ const accountRegistration = async(req, res) => {
 
         return Response.createdResponse('Account creation successful', accountData, res)
     } catch(err) {
-        logger.error(err);
+        console.log(err);
         return Response.serverError(
             'Ooops...Something occured in Account Creation endpoint',
             res, err
@@ -69,15 +59,6 @@ const login = async(req, res) => {
         if(!passwordMatch) {
             return Response.UnprocessableResponse("Incorrect credentials", res);
         }
-
-        // Check if account is verified
-        if(account.isEmailVerified === false) {
-            return Response.UnprocessableResponse("Verify email before login", res);
-        }
-
-        if(account.isPhoneVerified === false) {
-            return Response.UnprocessableResponse("Verify phone number before login", res);
-        }
         //Serialize account data
         const accountData = generalHelper.removeConfidentialData(account);
 
@@ -92,109 +73,9 @@ const login = async(req, res) => {
         );
 
     } catch (err) {
-        logger.error(err);
+        console.log(err);
         return Response.serverError(
             'Ooops...Something occured in Login endpoint',
-            res, err
-        );
-    }
-}
-
-const resendVerificationCode = async(req, res) => {
-    try{
-        const { email, phoneNumber, verificationMethod } = req.body;
-        if(verificationMethod === 'email') {
-            //Check if email exist
-            const emailExist = await Account.findOne({email});
-            if(!emailExist){
-                return Response.UnprocessableResponse("Email does not exist", res);
-            }
-            //Generate email code to resend
-            const emailCode = generalHelper.generateEmailCode();
-            //Update the email code in the DB
-            await Account.updateOne({email}, {emailCode});
-
-            //IMPLEMENT EMAIL SENDING MECHANISM HERE
-
-            return Response.simpleResponse(
-                'Verification code sent succesfully',
-                res
-            );
-        } else{
-            //Check if phoneNumber exist
-            const phoneExist = await Account.findOne({phoneNumber});
-            if(!phoneExist){
-                return Response.UnprocessableResponse("Phone number does not exist", res);
-            }
-            //Generate phone code to resend
-            const phoneNumberCode = generalHelper.generatePhoneNumberCode();
-            //Update the phone number code in the DB
-            await Account.updateOne({phoneNumber}, {phoneNumberCode});
-
-            //IMPLEMENT OTP SENDING MECHANISM HERE
-
-            return Response.simpleResponse(
-                'Verification code sent succesfully',
-                res
-            );
-        }
-    } catch(err) {
-        logger.error(err);
-        return Response.serverError(
-            'Ooops...Something occured in resendVerificationCode endpoint',
-            res, err
-        );
-    }
-}
-
-const verifyAccount = async(req, res) => {
-    try{
-        const { emailCode, phoneNumberCode, authId, verificationMethod } = req.body;
-        //Check if id exist
-        const account = await Account.findOne({_id: authId});
-        if(!account) {
-            return Response.UnprocessableResponse("Account does not exist", res);
-        }
-        //Check if email and phone number is verified
-        if(verificationMethod === 'email'){
-            if(account.isEmailVerified){
-                return Response.UnprocessableResponse("Email already verified", res);
-            }
-            //Check if the code is valid
-            if(emailCode !== account.emailCode){
-                return Response.UnprocessableResponse("Wrong verification code", res);
-            }
-            //Update account to verify
-            account.isEmailVerified = true;
-            account.save();
-
-             // Remove confidential data from the account data
-            const accountData = generalHelper.removeConfidentialData(account);
-
-            return Response.successResponse('Email verification successful', accountData, res);
-        }
-
-        //Else Verify Phone Number
-        if(account.isPhoneVerified){
-            return Response.UnprocessableResponse("Phone Number already verified", res);
-        }
-        //Check if the code is valid
-        if(phoneNumberCode !== account.phoneNumberCode){
-            return Response.UnprocessableResponse("Wrong verification code", res);
-        }
-        //Update account to verify
-        account.isPhoneVerified = true;
-        account.save();
-
-         // Remove confidential data from the account data
-        const accountData = generalHelper.removeConfidentialData(account);
-
-        return Response.successResponse('Phone Number verification successful', accountData, res)
-        
-    } catch(err) {
-        logger.error(err);
-        return Response.serverError(
-            'Ooops...Something occured in verifyAccount endpoint',
             res, err
         );
     }
@@ -220,10 +101,22 @@ const sendPasswordResetCode = async(req, res) => {
         account.save();
         
         //IMPLEMENT THE EMAIL MECHANISM TO SEND TO USER
+        const sender = process.env.EMAIL_FROM;
+        const mailOptions = {
+            from: sender,
+            to: email,
+            subject: 'Password Reset Code',
+            text: `Your password reset code is: ${passwordCode}`,
+        };
+
+        const {message: emailStatus} = await transporter.sendMail(mailOptions);
+        if(emailStatus !== 'success') {
+            return Response.UnprocessableResponse("Sending of PAssword reset code failed", res);
+        }
 
         return Response.simpleResponse("Password reset code sent", res);
     } catch(err) {
-        logger.error(err);
+        console.log(err);
         return Response.serverError(
             'Ooops...Something occured in forgotPassword endpoint',
             res, err
@@ -252,7 +145,7 @@ const validatePasswordResetCode = async(req, res) => {
 
         return Response.simpleResponse('Valid pasword code', res);
     } catch(err) {
-        logger.error(err);
+        console.log(err);
         return Response.serverError(
             'Ooops...Something occured in validatePasswordResetCode endpoint',
             res, err
@@ -275,7 +168,7 @@ const updatePassword = async(req, res) => {
 
         return Response.simpleResponse('Password change successful', res);
     } catch(err) {
-        logger.error(err);
+        console.log(err);
         return Response.serverError(
             'Ooops...Something occured in update password endpoint',
             res, err
@@ -301,7 +194,7 @@ const updateAccount = async(req, res) => {
 
         return Response.createdResponse('Account updated successfully', accountData, res);
     } catch(err) {
-        logger.error(err);
+        console.log(err);
         return Response.serverError(
             'Ooops...Something occured in update account endpoint',
             res, err
@@ -313,7 +206,7 @@ const assignRole = async(req, res) => {
     try{
         const { userId, role } = req.body;
         // Check if account is authorised to perform this task
-        if(req.auth.accountType !== 'admin') {
+        if(req.auth.role !== 'admin') {
             return Response.unAuthorizedResponse('You are not authorized to perform this task!', res);
         }
         //Check if account exist
@@ -321,10 +214,7 @@ const assignRole = async(req, res) => {
         if(!account) {
             return Response.UnprocessableResponse("Account does not exist", res);
         }
-        // Check if account type is valid for assignment
-        if(account.accountType !== 'staff') {
-            return Response.UnprocessableResponse("Role cannot be assigned to this account", res);
-        }
+       
         // Assign role
         account.role = role;
         account.save();
@@ -334,7 +224,7 @@ const assignRole = async(req, res) => {
 
         return Response.createdResponse('Role assigned successfully', accountData, res);
     } catch(err) {
-        logger.error(err);
+        console.log(err);
         return Response.serverError(
             'Ooops...Something occured in update account endpoint',
             res, err
@@ -345,8 +235,6 @@ const assignRole = async(req, res) => {
 module.exports = {
     accountRegistration,
     login,
-    resendVerificationCode,
-    verifyAccount,
     sendPasswordResetCode,
     validatePasswordResetCode,
     updatePassword,

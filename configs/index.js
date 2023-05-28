@@ -1,9 +1,9 @@
-const db = require("./db")
-const env = require("./env")
-const swagger = require("./swagger")
+const db = require("./db");
+const swagger = require("./swagger");
+const transporter = require("./env");
 
 module.exports = {
   db: db,
-  env: env,
-  swagger: swagger
+  swagger: swagger,
+  transporter: transporter
 };
